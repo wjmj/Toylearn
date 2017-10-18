@@ -35,27 +35,27 @@ class DecisionTreeClassifier(object):
             return y[0]
         a = self._chose_best_split(X, y, fea_indeies)
         fea_indeies = np.delete(fea_indeies, a)
-        u, counts = np.unique(X[:, a], return_counts = True)
-        V = counts.size
+        values, counts = np.unique(X[:, a], return_counts = True)
         tree = {}
         tree[a] = {}
-        for v in u:
-            if (y[X[:, a] == v].size == 0):
+        for v in values:
+            selected = X[:, a] == v
+            if (y[selected].size == 0):
                 tree[a][v] = self._most(y)
             else:
-                tree[a][v] = self._build_tree(X[X[:,a] == v], y[X[:, a] == v], fea_indeies)
+                tree[a][v] = self._build_tree(X[selected], y[selected], fea_indeies)
         return tree
 
     def fit(self, X, y):
         X = np.array(X)
-        y = np.reshape(y , (y.size, 1))
+        y = y.reshape(y.size, 1)
         fea_indeies = np.arange(X.shape[1])
         self._tree = self._build_tree(X, y, fea_indeies)
 
     def _pred(self, x, tree):
-        node = tree[0][x[tree[0]]]
+        node = tree[0][x[list(tree.keys())[0]]]
         if node is dict:
-            return self._pred(x, tree[0][x[tree[0]]])
+            return self._pred(x, node)
         return node
 
     def predict(self, X):
@@ -72,6 +72,7 @@ if __name__ == '__main__':
     clf = DecisionTreeClassifier()
     clf.fit(x, y)
     
-    z = np.array([[10,11,12], [13, 14, 15]])
+    z = np.array([[0,4,2], [3, 7, 8]])
     pred =  clf.predict(z)
     print(pred)
+    print(clf._tree)
